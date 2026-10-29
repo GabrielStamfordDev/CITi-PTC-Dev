@@ -1,4 +1,4 @@
-import {Luminosidade, Prisma} from "@prisma/client"
+import {Luminosidade, Prisma, Planta} from "@prisma/client"
 import prisma from "@database"
 
 export const createPlanta = async (data: Prisma.PlantaCreateInput) => {
@@ -40,8 +40,29 @@ export const deletePlanta = async (id: number) => {
 };
 
 export const decrementaEstoque = async (id: number, quantidade: number) => {
-    return await prisma.planta.update({
-        where: {id:id},
-        data: {estoque: {decrement: quantidade}}
+  // Cria a região crítica
+  return await prisma.$transaction(async (tx) => {
+    // LOCK
+    const plantas = await tx.$queryRaw<Planta[]>`
+      SELECT * FROM "Planta" WHERE "id" = ${id} FOR UPDATE
+    `;
+
+    const planta = plantas[0];
+
+    if (!planta) {
+      return { status: "NAO_ENCONTRADO", data: null };
+    }
+
+    if (planta.estoque < quantidade) {
+      return { status: "ESTOQUE_INSUFICIENTE", data: planta };
+    }
+
+    const plantaAtualizada = await tx.planta.update({
+      where: { id },
+      data: { estoque: { decrement: quantidade } },
     });
+
+    // Libera o lock automaticamente ao retornar
+    return { status: "SUCESSO", data: plantaAtualizada };
+  });
 };

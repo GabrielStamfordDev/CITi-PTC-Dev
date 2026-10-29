@@ -272,43 +272,41 @@ export const deletePlanta = async (req: Request, res: Response) => {
 };
 
 export const venderPlanta = async (req: Request, res: Response) => {
-    try{
-        const id = Number(req.params.id);
+  try {
+    const id = Number(req.params.id);
 
-        if (!(Number.isInteger(id) && id > 0)) {
-        return res.status(400).json({
-            message: "O id informado deve ser um número inteiro positivo.",
-        });
-        }
-
-        const { quantidade } = req.body;
-
-        if (!(Number.isInteger(quantidade) && quantidade > 0)) {
-        return res.status(400).json({
-        message:
-          "O campo 'quantidade' é obrigatório e deve ser um número inteiro maior que zero.",
-        });
-    }
-
-    const planta = await PlantaRepository.findPlantaById(id);
-
-    if (!planta) {
-      return res.status(404).json({ message: "Planta não encontrada." });
-    }
-
-    if (planta.estoque < quantidade) {
+    if (!(Number.isInteger(id) && id > 0)) {
       return res.status(400).json({
-        message: `Estoque insuficiente. Temos só ${planta.estoque} vasos disponíveis.`,
+        message: "O id informado deve ser um número inteiro positivo.",
       });
     }
-    const plantaAtualizada = await PlantaRepository.decrementaEstoque(
+
+    const { quantidade } = req.body;
+
+    if (!(Number.isInteger(quantidade) && quantidade > 0)) {
+      return res.status(400).json({
+        message:
+          "O campo 'quantidade' é obrigatório e deve ser um número inteiro maior que zero.",
+      });
+    }
+
+    const resultado = await PlantaRepository.decrementaEstoque(
       id,
       quantidade
     );
 
-    return res.status(200).json(plantaAtualizada);
+    if (resultado.status === "NAO_ENCONTRADO") {
+      return res.status(404).json({ message: "Planta não encontrada." });
     }
-    catch{
-        return res.status(500).json({ message: "Erro ao realizar venda da Planta" });
+
+    if (resultado.status === "ESTOQUE_INSUFICIENTE") {
+      return res.status(400).json({
+        message: `Estoque insuficiente. Temos só ${resultado.data?.estoque} vasos disponíveis.`,
+      });
     }
-}
+
+    return res.status(200).json(resultado.data);
+  } catch (error) {
+    return res.status(500).json({ message: "Erro ao realizar venda da Planta" });
+  }
+};
