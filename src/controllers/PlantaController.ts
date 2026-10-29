@@ -137,11 +137,13 @@ export const createPlanta = async (req: Request, res: Response) => {
 
 export const readAllPlantas = async (req: Request, res: Response) => {
   try {
-    const { luminosidade, petFriendly} = req.query;
+    const { luminosidade, petFriendly, nome} = req.query;
 
     let ValidaLuminosidade: Luminosidade | undefined = undefined;
 
     let ValidapetFriendly: boolean | undefined = undefined;
+
+    let ValidaNome: string | undefined = undefined;
 
     if (luminosidade !== undefined){
         if(!(typeof luminosidade === "string" && Object.values(Luminosidade).includes(luminosidade as Luminosidade))){
@@ -162,9 +164,19 @@ export const readAllPlantas = async (req: Request, res: Response) => {
         ValidapetFriendly = petFriendly === "true";
     }
 
+    if (nome !== undefined) {
+      if (!(typeof nome === "string" && nome.trim() !== "")) {
+        return res.status(400).json({
+          message: "Filtro 'nome' inválido. Deve ser um texto não vazio.",
+        });
+      }
+      ValidaNome = nome.trim();
+    }
+
     const plantas = await PlantaRepository.findAllPlantas({
         luminosidade: ValidaLuminosidade,
         petFriendly: ValidapetFriendly,
+        nome: ValidaNome
     });
     return res.status(200).json(plantas);
   } catch (error) {

@@ -11,11 +11,16 @@ export const findAllPlantas = async (
 filtros?: {
     luminosidade?: Luminosidade;
     petFriendly?: boolean;
+    nome?: string;
 }) => {
     return await prisma.planta.findMany({
         where: {
             luminosidade: filtros?.luminosidade,
             petFriendly: filtros?.petFriendly,
+            ...(filtros?.nome && {nome:{
+                contains: filtros.nome,
+                mode: "insensitive"
+            }})
         },
     });
 };
