@@ -12,6 +12,7 @@ filtros?: {
     luminosidade?: Luminosidade;
     petFriendly?: boolean;
     nome?: string;
+    ordem?: "preco" | "nome";
 }) => {
     return await prisma.planta.findMany({
         where: {
@@ -22,6 +23,7 @@ filtros?: {
                 mode: "insensitive"
             }})
         },
+        orderBy: filtros?.ordem ? { [filtros.ordem]: "asc" } : undefined
     });
 };
 

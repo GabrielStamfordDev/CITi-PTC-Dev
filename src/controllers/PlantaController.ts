@@ -137,13 +137,15 @@ export const createPlanta = async (req: Request, res: Response) => {
 
 export const readAllPlantas = async (req: Request, res: Response) => {
   try {
-    const { luminosidade, petFriendly, nome} = req.query;
+    const { luminosidade, petFriendly, nome, ordem } = req.query;
 
     let ValidaLuminosidade: Luminosidade | undefined = undefined;
 
     let ValidapetFriendly: boolean | undefined = undefined;
 
     let ValidaNome: string | undefined = undefined;
+
+    let ValidaOrdem: "preco" | "nome" | undefined = undefined;
 
     if (luminosidade !== undefined){
         if(!(typeof luminosidade === "string" && Object.values(Luminosidade).includes(luminosidade as Luminosidade))){
@@ -173,10 +175,20 @@ export const readAllPlantas = async (req: Request, res: Response) => {
       ValidaNome = nome.trim();
     }
 
+    if (ordem !== undefined) {
+      if (!(typeof ordem === "string" && (ordem === "preco" || ordem === "nome"))) {
+        return res.status(400).json({
+          message: "Filtro 'ordem' inválido. Use 'preco' ou 'nome'.",
+        });
+      }
+      ValidaOrdem = ordem;
+    }
+
     const plantas = await PlantaRepository.findAllPlantas({
         luminosidade: ValidaLuminosidade,
         petFriendly: ValidapetFriendly,
-        nome: ValidaNome
+        nome: ValidaNome,
+        ordem: ValidaOrdem
     });
     return res.status(200).json(plantas);
   } catch (error) {
