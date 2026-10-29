@@ -26,7 +26,7 @@ export const findPlantaById = async (id: number) => {
     });
 };
 
-export const updatePlanta = async (id: number, data: Prisma.PlantaCreateInput) => {
+export const updatePlanta = async (id: number, data: Prisma.PlantaUpdateInput) => {
     return await prisma.planta.update({
         where: {id:id},
         data: data
