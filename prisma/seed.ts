@@ -2,11 +2,11 @@ import { PrismaClient, Luminosidade } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-try {
-  // Limpa a tabela antes de popular para garantir idempotência 
-  // ao rodar o seed várias vezes
+async function main() {
+  // Limpa a tabela antes de popular (garante a idempotência)
   await prisma.planta.deleteMany();
 
+  // Insere as plantas de exemplo
   await prisma.planta.createMany({
     data: [
       {
@@ -40,7 +40,7 @@ try {
         nome: "Palmeira Areca",
         especie: "Dypsis lutescens",
         preco: 12000,
-        estoque: 0,
+        estoque: 0, // Estoque zero para testar a rota /esgotadas
         luminosidade: Luminosidade.MEIA_SOMBRA,
         petFriendly: true,
         regaACadaDias: 5,
@@ -49,15 +49,21 @@ try {
         nome: "Suculenta Zebra",
         especie: "Haworthiopsis attenuata",
         preco: 1890,
-        estoque: 0,
+        estoque: 0, // Estoque zero para testar a rota /esgotadas
         luminosidade: Luminosidade.SOL_PLENO,
         petFriendly: true,
         regaACadaDias: 14,
       },
     ],
   });
-} catch (error) {
-  console.error(error);
-} finally {
-  await prisma.$disconnect();
+
+  console.log("🌱 Banco de dados populado com sucesso!");
 }
+
+main()
+  .catch((e) => {
+    console.error(e);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
