@@ -68,7 +68,7 @@ O `.env` guarda as configurações do projeto e **não vai para o git**. Os valo
 | `yarn migration` | Cria uma migration a partir do `schema.prisma` e aplica no banco |
 | `yarn studio` | Abre o Prisma Studio para ver o banco no navegador |
 | `yarn typecheck` | Procura erros de tipo no TypeScript |
-| `yarn seed` | Popula o Banco de Dados de forma **idempotente**, ou seja, limpa a tabela Planta antes de inserir as plantas de exemplos
+| `yarn seed` | Popula o Banco de Dados de forma **idempotente**, ou seja, limpa a tabela Planta antes de inserir as plantas de exemplos. |
 
 A API recarrega sozinha quando você salva um arquivo em `src/`. Só precisa rodar `docker compose up -d --build` de novo se mudar o `package.json` ou o `Dockerfile`.
 
